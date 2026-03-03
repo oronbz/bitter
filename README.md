@@ -72,16 +72,27 @@ bitter
 | `h` / `l`, `←` / `→` | Previous / next page |
 | `Ctrl-d` / `Ctrl-u` | Page down / page up |
 | `/` | Filter/search within panel |
+| Left click | Focus panel |
+| Mouse wheel | Scroll up / down |
 
 #### Actions
 
 | Key | Action |
 |-----|--------|
 | `t` | Trigger new build |
+| `R` | Rebuild selected build |
 | `a` | Abort running build |
 | `r` | Refresh current view |
 | `o` | Open build in browser |
 | `c` | Copy build URL to clipboard |
+
+#### Dialogs
+
+| Key | Action |
+|-----|--------|
+| `y` / `Enter` | Confirm action |
+| `n` / `Esc` | Cancel action |
+| `Tab` / `Shift-Tab` | Next / previous field (trigger dialog) |
 
 #### General
 
