@@ -48,6 +48,10 @@ func (m Model) SelectedBuild() (api.Build, bool) {
 	return item.Build, true
 }
 
+func (m Model) Filtering() bool {
+	return m.list.FilterState() == list.Filtering
+}
+
 func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 	if !m.focused {
 		return m, nil

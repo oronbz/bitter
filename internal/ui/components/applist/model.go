@@ -63,6 +63,10 @@ func (m Model) SelectedApp() (api.App, bool) {
 	return item.App, true
 }
 
+func (m Model) Filtering() bool {
+	return m.list.FilterState() == list.Filtering
+}
+
 func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 	if !m.focused {
 		return m, nil

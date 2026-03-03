@@ -239,8 +239,9 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		return m, cmd
 	}
 
-	// Global keys
-	if keyMsg, ok := msg.(tea.KeyMsg); ok {
+	// Global keys (skip when a list is filtering, so keystrokes go to the filter input)
+	filtering := m.appList.Filtering() || m.buildList.Filtering()
+	if keyMsg, ok := msg.(tea.KeyMsg); ok && !filtering {
 		switch {
 		case key.Matches(keyMsg, Keys.Quit):
 			return m, tea.Quit
