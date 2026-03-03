@@ -18,6 +18,7 @@ const (
 type Model struct {
 	panel   Panel
 	errMsg  string
+	infoMsg string
 	loading string
 }
 
@@ -45,6 +46,14 @@ func (m *Model) ClearLoading() {
 	m.loading = ""
 }
 
+func (m *Model) SetInfo(msg string) {
+	m.infoMsg = msg
+}
+
+func (m *Model) ClearInfo() {
+	m.infoMsg = ""
+}
+
 type hint struct {
 	key  string
 	desc string
@@ -58,7 +67,8 @@ var (
 			Padding(0, 1)
 	keyStyle = lipgloss.NewStyle().Foreground(styles.Amber).Bold(true)
 	dimStyle = lipgloss.NewStyle().Foreground(styles.DimGray)
-	errStyle = lipgloss.NewStyle().Foreground(styles.Red)
+	errStyle  = lipgloss.NewStyle().Foreground(styles.Red)
+	infoStyle = lipgloss.NewStyle().Foreground(styles.Green)
 
 	appsHints = []hint{
 		{"↑/k", "up"}, {"↓/j", "down"},
@@ -97,6 +107,8 @@ func (m Model) View() string {
 	var rightText string
 	if m.errMsg != "" {
 		rightText = "  " + errStyle.Render(m.errMsg)
+	} else if m.infoMsg != "" {
+		rightText = "  " + infoStyle.Render(m.infoMsg)
 	} else if m.loading != "" {
 		rightText = "  " + dimStyle.Render(m.loading)
 	}

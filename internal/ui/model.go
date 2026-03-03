@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os/exec"
 	"runtime"
+	"time"
 
 	"github.com/atotto/clipboard"
 	"github.com/charmbracelet/bubbles/key"
@@ -117,6 +118,10 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			}
 			return m, cmd
 		}
+
+	case clearInfoMsg:
+		m.statusBar.ClearInfo()
+		return m, nil
 
 	case spinner.TickMsg:
 		var cmd tea.Cmd
@@ -324,8 +329,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			openBrowser(m.buildURL())
 			return m, nil
 		case key.Matches(keyMsg, Keys.Copy):
-			m.copyURL()
-			return m, nil
+			return m, m.copyURL()
 		}
 	}
 
@@ -508,20 +512,32 @@ func (m *Model) handleRefresh() tea.Cmd {
 }
 
 func (m *Model) buildURL() string {
-	if m.selectedApp == nil || m.selectedBuild == nil {
+	if m.selectedApp == nil {
 		return ""
 	}
-	return fmt.Sprintf("https://app.bitrise.io/build/%s", m.selectedBuild.Slug)
+	// Prefer the currently highlighted build, fall back to the selected (entered) build.
+	if b, ok := m.buildList.SelectedBuild(); ok {
+		return fmt.Sprintf("https://app.bitrise.io/build/%s", b.Slug)
+	}
+	if m.selectedBuild != nil {
+		return fmt.Sprintf("https://app.bitrise.io/build/%s", m.selectedBuild.Slug)
+	}
+	return ""
 }
 
-func (m *Model) copyURL() {
+type clearInfoMsg struct{}
+
+func (m *Model) copyURL() tea.Cmd {
 	url := m.buildURL()
 	if url == "" {
-		return
+		return nil
 	}
 	if err := clipboard.WriteAll(url); err != nil {
 		m.statusBar.SetError("Copy failed: " + err.Error())
+		return nil
 	}
+	m.statusBar.SetInfo("Copied build URL to clipboard")
+	return tea.Tick(2*time.Second, func(time.Time) tea.Msg { return clearInfoMsg{} })
 }
 
 func openBrowser(url string) {
