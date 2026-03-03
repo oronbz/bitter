@@ -67,6 +67,7 @@ bitter
 | `Enter` | Select item |
 | `Tab` / `Shift-Tab` | Switch panel |
 | `g` / `G` | Jump to top / bottom |
+| `h` / `l`, `←` / `→` | Previous / next page |
 | `Ctrl-d` / `Ctrl-u` | Page down / page up |
 | `/` | Filter/search within panel |
 
