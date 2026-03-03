@@ -25,7 +25,6 @@ release:
 		case "$$next" in v*) ;; *) next="v$$next" ;; esac; \
 	fi; \
 	echo "Releasing $$next..."; \
-	git add -A && git commit -m "Release $$next" --allow-empty; \
 	git tag "$$next"; \
-	git push && git push origin "$$next"; \
+	git push origin "$$next"; \
 	echo "Released $$next"
