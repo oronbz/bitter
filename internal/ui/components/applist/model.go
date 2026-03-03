@@ -69,7 +69,10 @@ func (m Model) Filtering() bool {
 
 func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 	if !m.focused {
-		return m, nil
+		// Still handle mouse events (scroll) when unfocused.
+		if _, ok := msg.(tea.MouseMsg); !ok {
+			return m, nil
+		}
 	}
 	var cmd tea.Cmd
 	m.list, cmd = m.list.Update(msg)

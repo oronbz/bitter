@@ -1,10 +1,16 @@
 package logview
 
 import (
+	"github.com/charmbracelet/bubbles/key"
 	"github.com/charmbracelet/bubbles/viewport"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
 	"github.com/oronbz/bitter/internal/ui/styles"
+)
+
+var (
+	topKey    = key.NewBinding(key.WithKeys("g"))
+	bottomKey = key.NewBinding(key.WithKeys("G"))
 )
 
 type Model struct {
@@ -37,7 +43,20 @@ func (m *Model) ScrollToBottom() {
 
 func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 	if !m.focused {
-		return m, nil
+		// Still handle mouse events (scroll) when unfocused.
+		if _, ok := msg.(tea.MouseMsg); !ok {
+			return m, nil
+		}
+	}
+	if keyMsg, ok := msg.(tea.KeyMsg); ok {
+		switch {
+		case key.Matches(keyMsg, topKey):
+			m.viewport.GotoTop()
+			return m, nil
+		case key.Matches(keyMsg, bottomKey):
+			m.viewport.GotoBottom()
+			return m, nil
+		}
 	}
 	var cmd tea.Cmd
 	m.viewport, cmd = m.viewport.Update(msg)

@@ -15,8 +15,8 @@ func FetchBuilds(client *api.Client, appSlug string) tea.Cmd {
 
 func TriggerBuild(client *api.Client, appSlug string, params api.TriggerBuildParams) tea.Cmd {
 	return func() tea.Msg {
-		build, err := client.TriggerBuild(appSlug, params)
-		return messages.BuildTriggeredMsg{Build: build, Err: err}
+		err := client.TriggerBuild(appSlug, params)
+		return messages.BuildTriggeredMsg{Err: err}
 	}
 }
 

@@ -34,9 +34,9 @@ func (c *Client) GetBuild(appSlug, buildSlug string) (Build, error) {
 	return decode[Build](data, "data")
 }
 
-func (c *Client) TriggerBuild(appSlug string, params TriggerBuildParams) (Build, error) {
+func (c *Client) TriggerBuild(appSlug string, params TriggerBuildParams) error {
 	buildParams := map[string]string{
-		"branch":     params.Branch,
+		"branch":      params.Branch,
 		"workflow_id": params.WorkflowID,
 	}
 	if params.CommitMessage != "" {
@@ -52,15 +52,11 @@ func (c *Client) TriggerBuild(appSlug string, params TriggerBuildParams) (Build,
 
 	data, err := json.Marshal(payload)
 	if err != nil {
-		return Build{}, err
+		return err
 	}
 
-	resp, err := c.post(fmt.Sprintf("/apps/%s/builds", appSlug), string(data))
-	if err != nil {
-		return Build{}, err
-	}
-
-	return decode[Build](resp, "build_data")
+	_, err = c.post(fmt.Sprintf("/apps/%s/builds", appSlug), string(data))
+	return err
 }
 
 func (c *Client) AbortBuild(appSlug, buildSlug string, params AbortBuildParams) error {

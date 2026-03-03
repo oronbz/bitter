@@ -6,11 +6,19 @@ import (
 	"github.com/oronbz/bitter/internal/ui/styles"
 )
 
-type ConfirmYesMsg struct{}
+type ConfirmAction int
+
+const (
+	ConfirmAbort ConfirmAction = iota
+	ConfirmRebuild
+)
+
+type ConfirmYesMsg struct{ Action ConfirmAction }
 type ConfirmNoMsg struct{}
 
 type ConfirmModel struct {
 	message string
+	action  ConfirmAction
 	visible bool
 	width   int
 	height  int
@@ -20,8 +28,9 @@ func NewConfirm() ConfirmModel {
 	return ConfirmModel{}
 }
 
-func (m *ConfirmModel) Show(message string) {
+func (m *ConfirmModel) Show(message string, action ConfirmAction) {
 	m.message = message
+	m.action = action
 	m.visible = true
 }
 
@@ -47,8 +56,9 @@ func (m ConfirmModel) Update(msg tea.Msg) (ConfirmModel, tea.Cmd) {
 	case tea.KeyMsg:
 		switch msg.String() {
 		case "y", "Y", "enter":
+			action := m.action
 			m.Hide()
-			return m, func() tea.Msg { return ConfirmYesMsg{} }
+			return m, func() tea.Msg { return ConfirmYesMsg{Action: action} }
 		case "n", "N", "esc":
 			m.Hide()
 			return m, func() tea.Msg { return ConfirmNoMsg{} }

@@ -94,6 +94,7 @@ func helpContent() string {
 	sb.WriteString(h.Render("Actions"))
 	sb.WriteString("\n")
 	sb.WriteString(k.Render("t") + d.Render("Trigger new build") + "\n")
+	sb.WriteString(k.Render("R") + d.Render("Rebuild selected build") + "\n")
 	sb.WriteString(k.Render("a") + d.Render("Abort running build") + "\n")
 	sb.WriteString(k.Render("r") + d.Render("Refresh current view") + "\n")
 	sb.WriteString(k.Render("/") + d.Render("Filter / search") + "\n")

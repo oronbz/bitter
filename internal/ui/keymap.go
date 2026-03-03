@@ -13,6 +13,7 @@ type KeyMap struct {
 	PageDown  key.Binding
 	PageUp    key.Binding
 	Trigger   key.Binding
+	Rebuild   key.Binding
 	Abort     key.Binding
 	Refresh   key.Binding
 	Filter    key.Binding
@@ -63,6 +64,10 @@ var Keys = KeyMap{
 	Trigger: key.NewBinding(
 		key.WithKeys("t"),
 		key.WithHelp("t", "trigger build"),
+	),
+	Rebuild: key.NewBinding(
+		key.WithKeys("R"),
+		key.WithHelp("R", "rebuild"),
 	),
 	Abort: key.NewBinding(
 		key.WithKeys("a"),

@@ -18,8 +18,7 @@ type LogLoadedMsg struct {
 }
 
 type BuildTriggeredMsg struct {
-	Build api.Build
-	Err   error
+	Err error
 }
 
 type BuildAbortedMsg struct {

@@ -93,6 +93,31 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.resize()
 		return m, nil
 
+	case tea.MouseMsg:
+		if m.triggerDlg.Visible() || m.confirmDlg.Visible() || m.helpOverlay.Visible() {
+			break
+		}
+		target, ok := m.panelForMouse(msg.X, msg.Y)
+		if !ok {
+			break
+		}
+		if msg.Action == tea.MouseActionPress && msg.Button == tea.MouseButtonLeft {
+			m.setFocus(target)
+			return m, nil
+		}
+		if msg.Button == tea.MouseButtonWheelUp || msg.Button == tea.MouseButtonWheelDown {
+			var cmd tea.Cmd
+			switch target {
+			case PanelApps:
+				m.appList, cmd = m.appList.Update(msg)
+			case PanelBuilds:
+				m.buildList, cmd = m.buildList.Update(msg)
+			case PanelLogs:
+				m.logView, cmd = m.logView.Update(msg)
+			}
+			return m, cmd
+		}
+
 	case spinner.TickMsg:
 		var cmd tea.Cmd
 		m.spinner, cmd = m.spinner.Update(msg)
@@ -106,6 +131,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		}
 		m.statusBar.ClearError()
 		m.appList.SetApps(msg.Apps)
+		m.resize() // recalculate after items change pagination
 		return m, nil
 
 	case messages.BuildsLoadedMsg:
@@ -116,6 +142,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		}
 		m.statusBar.ClearError()
 		m.buildList.SetBuilds(msg.Builds)
+		m.resize() // recalculate after items change pagination
 		if m.pendingFocus {
 			m.pendingFocus = false
 			m.cycleFocus(1)
@@ -206,11 +233,25 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		})
 
 	case dialog.ConfirmYesMsg:
-		if m.selectedApp == nil || m.selectedBuild == nil {
+		if m.selectedApp == nil {
 			return m, nil
 		}
-		m.statusBar.SetLoading("Aborting build...")
-		return m, commands.AbortBuild(m.client, m.selectedApp.Slug, m.selectedBuild.Slug)
+		switch msg.Action {
+		case dialog.ConfirmAbort:
+			if m.selectedBuild == nil {
+				return m, nil
+			}
+			m.statusBar.SetLoading("Aborting build...")
+			return m, commands.AbortBuild(m.client, m.selectedApp.Slug, m.selectedBuild.Slug)
+		case dialog.ConfirmRebuild:
+			if b, ok := m.buildList.SelectedBuild(); ok {
+				m.statusBar.SetLoading("Triggering rebuild...")
+				return m, commands.TriggerBuild(m.client, m.selectedApp.Slug, api.TriggerBuildParams{
+					Branch:     b.Branch,
+					WorkflowID: b.TriggeredWorkflow,
+				})
+			}
+		}
 
 	case dialog.ConfirmNoMsg:
 		return m, nil
@@ -229,7 +270,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	}
 	if m.helpOverlay.Visible() {
 		if keyMsg, ok := msg.(tea.KeyMsg); ok {
-			if key.Matches(keyMsg, Keys.Help) || key.Matches(keyMsg, Keys.Escape) {
+			if key.Matches(keyMsg, Keys.Help) || key.Matches(keyMsg, Keys.Escape) || key.Matches(keyMsg, Keys.Quit) {
 				m.helpOverlay.Toggle()
 				return m, nil
 			}
@@ -261,10 +302,20 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				m.triggerDlg.Show()
 			}
 			return m, nil
+		case key.Matches(keyMsg, Keys.Rebuild):
+			if m.selectedApp != nil {
+				if b, ok := m.buildList.SelectedBuild(); ok {
+					m.confirmDlg.Show(
+						fmt.Sprintf("Rebuild #%d (%s / %s)?", b.BuildNumber, b.Branch, b.TriggeredWorkflow),
+						dialog.ConfirmRebuild,
+					)
+				}
+			}
+			return m, nil
 		case key.Matches(keyMsg, Keys.Abort):
 			if b, ok := m.buildList.SelectedBuild(); ok && b.Status == api.BuildStatusRunning {
 				m.selectedBuild = &b
-				m.confirmDlg.Show(fmt.Sprintf("Abort build #%d on %s?", b.BuildNumber, b.Branch))
+				m.confirmDlg.Show(fmt.Sprintf("Abort build #%d on %s?", b.BuildNumber, b.Branch), dialog.ConfirmAbort)
 			}
 			return m, nil
 		case key.Matches(keyMsg, Keys.Refresh):
@@ -350,6 +401,42 @@ func (m *Model) resize() {
 	m.helpOverlay.SetSize(m.width, m.height)
 	m.triggerDlg.SetSize(m.width, m.height)
 	m.confirmDlg.SetSize(m.width, m.height)
+}
+
+func (m *Model) setFocus(panel Panel) {
+	if m.focusedPanel == panel {
+		return
+	}
+	m.appList.SetFocused(false)
+	m.buildList.SetFocused(false)
+	m.logView.SetFocused(false)
+
+	m.focusedPanel = panel
+	switch panel {
+	case PanelApps:
+		m.appList.SetFocused(true)
+		m.statusBar.SetPanel(statusbar.PanelApps)
+	case PanelBuilds:
+		m.buildList.SetFocused(true)
+		m.statusBar.SetPanel(statusbar.PanelBuilds)
+	case PanelLogs:
+		m.logView.SetFocused(true)
+		m.statusBar.SetPanel(statusbar.PanelLogs)
+	}
+}
+
+func (m Model) panelForMouse(x, y int) (Panel, bool) {
+	l := m.layout
+	if y >= l.TotalHeight-statusBarHeight {
+		return 0, false
+	}
+	if x < l.AppsWidth+2 {
+		return PanelApps, true
+	}
+	if m.selectedBuild != nil && y >= l.BuildsHeight+2 {
+		return PanelLogs, true
+	}
+	return PanelBuilds, true
 }
 
 func (m *Model) cycleFocus(dir int) {

@@ -61,12 +61,12 @@ var (
 	errStyle = lipgloss.NewStyle().Foreground(styles.Red)
 
 	appsHints = []hint{
-		{"↑/k", "up"}, {"↓/j", "down"}, {"⏎", "select"},
+		{"↑/k", "up"}, {"↓/j", "down"},
 		{"Tab", "panel"}, {"/", "filter"}, {"?", "help"}, {"q", "quit"},
 	}
 	buildsHints = []hint{
-		{"↑/k", "up"}, {"↓/j", "down"}, {"⏎", "select"},
-		{"Tab", "panel"}, {"t", "trigger"}, {"a", "abort"},
+		{"↑/k", "up"}, {"↓/j", "down"},
+		{"Tab", "panel"}, {"t", "trigger"}, {"R", "rebuild"}, {"a", "abort"},
 		{"/", "filter"}, {"?", "help"}, {"q", "quit"},
 	}
 	logsHints = []hint{
