@@ -7,6 +7,7 @@ import (
 	"os/exec"
 	"path/filepath"
 	"runtime"
+	"runtime/debug"
 	"strings"
 
 	tea "github.com/charmbracelet/bubbletea"
@@ -15,7 +16,17 @@ import (
 	"github.com/oronbz/bitter/internal/ui"
 )
 
-const version = "0.1.0"
+var version = "dev"
+
+func getVersion() string {
+	if version != "dev" {
+		return version
+	}
+	if info, ok := debug.ReadBuildInfo(); ok && info.Main.Version != "" && info.Main.Version != "(devel)" {
+		return info.Main.Version
+	}
+	return version
+}
 
 func main() {
 	if len(os.Args) > 1 {
@@ -27,7 +38,7 @@ func main() {
 			printHelp()
 			return
 		case "version", "--version", "-v":
-			fmt.Println("bitter " + version)
+			fmt.Println("bitter " + getVersion())
 			return
 		}
 	}
@@ -68,15 +79,20 @@ Config file:
 
 Keybindings (inside TUI):
   j/k, ↑/↓            Navigate lists / scroll logs
+  h/l, ←/→            Previous / next page
+  g / G                Jump to top / bottom
+  Ctrl-u / Ctrl-d      Page up / page down
   Enter                Select item
   Tab / Shift-Tab      Switch panel
   t                    Trigger new build
+  R                    Rebuild selected build
   a                    Abort running build
   r                    Refresh current view
   /                    Filter / search
   o                    Open build in browser
   c                    Copy build URL
   ?                    Show all keybindings
+  Esc                  Close dialog / popup
   q, Ctrl-C            Quit
 `)
 }

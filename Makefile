@@ -1,10 +1,12 @@
 .PHONY: build run clean release
 
+LDFLAGS = -ldflags "-X main.version=$$(git describe --tags --always --dirty 2>/dev/null || echo dev)"
+
 build:
-	go build -o bitter .
+	go build $(LDFLAGS) -o bitter .
 
 run:
-	go run .
+	go run $(LDFLAGS) .
 
 clean:
 	rm -f bitter
