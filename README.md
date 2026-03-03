@@ -20,6 +20,8 @@ A LazyGit-style terminal UI for [Bitrise CI](https://bitrise.io). Browse apps, v
 
 ## Install
 
+Requires [Go 1.25+](https://go.dev/dl/):
+
 ```bash
 go install github.com/oronbz/bitter@latest
 ```

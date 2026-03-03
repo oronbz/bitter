@@ -27,4 +27,6 @@ release:
 	echo "Releasing $$next..."; \
 	git tag "$$next"; \
 	git push origin "$$next"; \
+	echo "Warming Go proxy cache..."; \
+	curl -sf "https://proxy.golang.org/github.com/oronbz/bitter/@v/$$next.info" > /dev/null; \
 	echo "Released $$next"
