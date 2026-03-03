@@ -76,7 +76,7 @@ var (
 )
 
 func (m Model) View() string {
-	brand := brandStyle.Render("bitter")
+	brand := brandStyle.Render("BITTER")
 
 	var hints []hint
 	switch m.panel {

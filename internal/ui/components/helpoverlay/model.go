@@ -85,6 +85,8 @@ func helpContent() string {
 	sb.WriteString(k.Render("Tab / S-Tab") + d.Render("Switch panel") + "\n")
 	sb.WriteString(k.Render("g") + d.Render("Jump to top") + "\n")
 	sb.WriteString(k.Render("G") + d.Render("Jump to bottom") + "\n")
+	sb.WriteString(k.Render("h / ←") + d.Render("Previous page") + "\n")
+	sb.WriteString(k.Render("l / →") + d.Render("Next page") + "\n")
 	sb.WriteString(k.Render("Ctrl-d") + d.Render("Page down") + "\n")
 	sb.WriteString(k.Render("Ctrl-u") + d.Render("Page up") + "\n")
 

@@ -46,7 +46,8 @@ type Model struct {
 	selectedApp   *api.App
 	selectedBuild *api.Build
 	layout        Layout
-	autoRefresh   bool
+	autoRefresh    bool
+	pendingFocus   bool
 	width         int
 	height        int
 	ready         bool
@@ -115,6 +116,10 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		}
 		m.statusBar.ClearError()
 		m.buildList.SetBuilds(msg.Builds)
+		if m.pendingFocus {
+			m.pendingFocus = false
+			m.cycleFocus(1)
+		}
 		m.autoRefresh = false
 		for _, b := range msg.Builds {
 			if b.Status == api.BuildStatusRunning && !b.IsOnHold {
@@ -136,6 +141,10 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.statusBar.ClearError()
 		m.logView.SetContent(msg.Log)
 		m.logView.ScrollToBottom()
+		if m.pendingFocus {
+			m.pendingFocus = false
+			m.cycleFocus(1)
+		}
 		return m, nil
 
 	case messages.BuildTriggeredMsg:
@@ -373,6 +382,7 @@ func (m *Model) handleEnter() tea.Cmd {
 		if app, ok := m.appList.SelectedApp(); ok {
 			m.selectedApp = &app
 			m.selectedBuild = nil
+			m.pendingFocus = true
 			m.statusBar.SetLoading("Loading builds...")
 			m.logView.SetContent("")
 			m.resize()
@@ -381,6 +391,7 @@ func (m *Model) handleEnter() tea.Cmd {
 	case PanelBuilds:
 		if build, ok := m.buildList.SelectedBuild(); ok {
 			m.selectedBuild = &build
+			m.pendingFocus = true
 			m.resize()
 			m.statusBar.SetLoading("Loading log...")
 			return commands.FetchLog(m.client, m.selectedApp.Slug, build.Slug)
