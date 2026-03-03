@@ -39,9 +39,10 @@ var (
 
 	// Build list columns
 	BuildNumStyle      = lipgloss.NewStyle().Foreground(DimGray)
-	BuildBranchStyle   = lipgloss.NewStyle().Foreground(White).Bold(true)
+	BuildBranchStyle   = lipgloss.NewStyle().Foreground(Green)
 	BuildWorkflowStyle = lipgloss.NewStyle().Foreground(Blue)
 	BuildDurationStyle = lipgloss.NewStyle().Foreground(DimGray)
+	BuildCommitStyle   = lipgloss.NewStyle().Foreground(White)
 
 	// Error
 	ErrorStyle = lipgloss.NewStyle().Foreground(Red)

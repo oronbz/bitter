@@ -3,14 +3,14 @@ package buildlist
 import (
 	"fmt"
 	"io"
+	"strings"
 	"time"
 
 	"github.com/charmbracelet/bubbles/list"
 	tea "github.com/charmbracelet/bubbletea"
+	"github.com/charmbracelet/lipgloss"
 	"github.com/oronbz/bitter/internal/api"
 	"github.com/oronbz/bitter/internal/ui/styles"
-
-	"github.com/charmbracelet/lipgloss"
 )
 
 type Item struct {
@@ -20,7 +20,7 @@ type Item struct {
 func (i Item) Title() string       { return fmt.Sprintf("#%d %s", i.Build.BuildNumber, i.Build.Branch) }
 func (i Item) Description() string { return i.Build.TriggeredWorkflow }
 func (i Item) FilterValue() string {
-	return fmt.Sprintf("%d %s %s", i.Build.BuildNumber, i.Build.Branch, i.Build.TriggeredWorkflow)
+	return fmt.Sprintf("%d %s %s %s", i.Build.BuildNumber, i.Build.Branch, i.Build.TriggeredWorkflow, i.Build.CommitMessage)
 }
 
 type Delegate struct {
@@ -53,11 +53,16 @@ func (d Delegate) Render(w io.Writer, m list.Model, index int, listItem list.Ite
 	icon := styles.BuildStatusIcon(b.Status, b.IsOnHold)
 	num := styles.BuildNumStyle.Render(fmt.Sprintf("#%d", b.BuildNumber))
 	branch := styles.BuildBranchStyle.Render(b.Branch)
+	commitMsg := firstLine(b.CommitMessage)
+	if commitMsg == "" {
+		commitMsg = "No commit message"
+	}
+	commit := styles.BuildCommitStyle.Render(commitMsg)
 	workflow := styles.BuildWorkflowStyle.Render(b.TriggeredWorkflow)
 	dur := styles.BuildDurationStyle.Render(formatDuration(b))
 
-	line1 := fmt.Sprintf("%s %s %s", icon, num, branch)
-	line2 := fmt.Sprintf("  %s %s", workflow, dur)
+	line1 := fmt.Sprintf("%s %s", icon, commit)
+	line2 := fmt.Sprintf("  %s %s %s %s", num, branch, workflow, dur)
 
 	var style lipgloss.Style
 	if index == m.Index() {
@@ -72,6 +77,13 @@ func (d Delegate) Render(w io.Writer, m list.Model, index int, listItem list.Ite
 
 	content := style.Render(line1 + "\n" + line2)
 	fmt.Fprint(w, content)
+}
+
+func firstLine(s string) string {
+	if i := strings.IndexAny(s, "\r\n"); i >= 0 {
+		return s[:i]
+	}
+	return s
 }
 
 func formatDuration(b api.Build) string {
