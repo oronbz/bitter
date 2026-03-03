@@ -334,7 +334,7 @@ func (m Model) renderPanel(content string, width, height int, focused bool) stri
 	if focused {
 		style = styles.FocusedBorder
 	}
-	return style.Width(width).Height(height).Render(content)
+	return style.Width(width).Height(height).MaxHeight(height + 2).Render(content)
 }
 
 func (m *Model) resize() {

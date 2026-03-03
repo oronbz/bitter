@@ -66,6 +66,10 @@ func (d Delegate) Render(w io.Writer, m list.Model, index int, listItem list.Ite
 		style = d.normalStyle
 	}
 
+	// Clamp output to list width so long branch names don't wrap and
+	// break the panel height budget.
+	style = style.MaxWidth(m.Width())
+
 	content := style.Render(line1 + "\n" + line2)
 	fmt.Fprint(w, content)
 }
