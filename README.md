@@ -6,6 +6,8 @@ A LazyGit-style terminal UI for [Bitrise CI](https://bitrise.io). Browse apps, v
 ![Bitrise](https://img.shields.io/badge/Bitrise-CI-683D87?logo=bitrise&logoColor=white)
 ![License](https://img.shields.io/badge/license-MIT-blue)
 
+![bitter screenshot](screenshot.png)
+
 ## Features
 
 - **Three-panel layout** — apps sidebar, builds list, log viewer
